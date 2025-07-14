@@ -1,0 +1,37 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "admin@eventos.com",
+      "password": "admin123",
+      "role": "admin"
+    },
+    {
+      "id": "9a17",
+      "email": "julianmoralescolorado49@gmail.com",
+      "password": "1234",
+      "role": "visitor"
+    },
+    {
+      "id": "2687",
+      "fullName": "Pablo",
+      "email": "julianmoralescolorado42@gmail.com",
+      "password": "hola123",
+      "role": "visitor"
+    }
+  ],
+  "events": [
+    {
+      "id": "3167",
+      "title": "Papa",
+      "date": "5 de Diciembre",
+      "capacity": 1
+    },
+    {
+      "id": "039e",
+      "title": "Medellin",
+      "date": "10 de enero",
+      "capacity": 5
+    }
+  ]
+}
