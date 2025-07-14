@@ -135,6 +135,7 @@ function renderDashboard() {
   loadEvents();
 }
 
+// Function to load events
 async function loadEvents() {
   const user = getUser();
   const res = await fetch("http://localhost:3000/events");
