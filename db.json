@@ -20,18 +20,5 @@
       "role": "visitor"
     }
   ],
-  "events": [
-    {
-      "id": "3167",
-      "title": "Papa",
-      "date": "5 de Diciembre",
-      "capacity": 1
-    },
-    {
-      "id": "039e",
-      "title": "Medellin",
-      "date": "10 de enero",
-      "capacity": 5
-    }
-  ]
+  "events": []
 }

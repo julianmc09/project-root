@@ -99,6 +99,7 @@ document.getElementById("app").innerHTML = `
 // Function to display available events
 function renderDashboard() {
   const user = getUser();
+  document.querySelector(".admin-title").textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
   document.getElementById("app").innerHTML = `
     <div class="dashboard">
       <h2>Available Events</h2>
@@ -117,6 +118,7 @@ function renderDashboard() {
     document.getElementById("create-event").addEventListener("submit", async (e) => {
       e.preventDefault();
       const newEvent = {
+        id: crypto.randomUUID(),
         title: e.target.title.value,
         date: e.target.date.value,
         capacity: parseInt(e.target.capacity.value)
@@ -142,28 +144,72 @@ async function loadEvents() {
   const events = await res.json();
   const container = document.getElementById("events");
 
-  if (!events.length) return container.innerHTML = "<p>No events available.</p>";
+  if (!events.length) {
+    container.innerHTML = "<p>No events available.</p>";
+    return;
+  }
 
-  container.innerHTML = events.map(ev => `
-    <div class="event-card">
-      <strong>${ev.title}</strong><br>
-      <small>${ev.date}</small><br>
-      <span>Capacity: ${ev.capacity}</span><br>
-      ${user.role === "admin" ? `
-        <button onclick="deleteEvent('${ev.id}')">Delete</button>
-      ` : ""}
-    </div>`).join("");
-    
+  container.innerHTML = events.map(ev => {
+    const reservedEvents = JSON.parse(localStorage.getItem("reservedEvents") || "[]");
+    const isReserved = reservedEvents.includes(ev.id);
+
+    return `
+      <div class="event-card" id="event-${ev.id}" style="${isReserved ? 'background-color: #d0ffd0;' : ''}">
+        <strong>${ev.title}</strong><br>
+        <small>${ev.date}</small><br>
+        <span>Capacity: ${ev.capacity}</span><br>
+        ${user.role === "admin" ? `
+          <button onclick="deleteEvent('${ev.id}')">Delete</button>
+        ` : `
+          <button onclick="reserveEvent('${ev.id}')">
+            ${isReserved ? "Reserved" : "Reserve"}
+          </button>
+        `}
+      </div>`;
+  }).join("");
 }
+
 
 // Function to delete events
 async function deleteEvent(id) {
   if (confirm("Are you sure you want to delete this event?")) {
-    await fetch(`http://localhost:3000/events/${id}`, { method: "DELETE" });
-    renderDashboard();
+    const res = await fetch(`http://localhost:3000/events/${id}`, { method: "DELETE" });
 
+    // Eliminar directamente del DOM sin recargar
+    if(res.ok){
+      const eventElement = document.getElementById(`event-${id}`);
+      if (eventElement) eventElement.remove();
+    }else {
+      alert("Failed to delete the event. Please try again.");
+    }
+    
   }
 }
+
+window.deleteEvent = deleteEvent;
+
+// Function to reserve an event
+function reserveEvent(id) {
+  let reservedEvents = JSON.parse(localStorage.getItem("reservedEvents") || "[]");
+
+  if (!reservedEvents.includes(id)) {
+    reservedEvents.push(id);
+    localStorage.setItem("reservedEvents", JSON.stringify(reservedEvents));
+
+    const card = document.getElementById(`event-${id}`);
+    if (card) {
+      card.style.backgroundColor = "#d0ffd0";
+      const button = card.querySelector("button");
+      if (button) button.textContent = "Reserved";
+    }
+  } else {
+    alert("You have already reserved this event.");
+  }
+}
+
+window.reserveEvent = reserveEvent;
+
+
 
 // Function to display a message when you are not logged in or registered.
 function renderNotFound() {
@@ -181,6 +227,7 @@ function getUser() {
 // Event listener for the logout link
 document.getElementById("logout-link").addEventListener("click", () => {
   localStorage.removeItem("user");
+  localStorage.removeItem("reservedEvents");
   location.hash = "/login";
 });
 
