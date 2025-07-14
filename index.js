@@ -5,6 +5,7 @@ const routes = {
   "/dashboard": renderDashboard
 };
 
+// Function to condition navigation depending on whether you have logged in, registered or not
 function router() {
   const path = location.hash.slice(1) || "/dashboard";
   const user = getUser();
@@ -21,6 +22,7 @@ function router() {
 }
 
 
+// Option to log in
 function renderLogin() {
   document.getElementById("app").innerHTML = `
     <div class="auth-container login-view">
@@ -32,6 +34,8 @@ function renderLogin() {
       </form>
     </div>`;
 
+
+  // Event listener for the login form submission
   document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
@@ -39,6 +43,7 @@ function renderLogin() {
     const res = await fetch(`http://localhost:3000/users?email=${email}&password=${password}`);
     const users = await res.json();
 
+    // If the user exists, save it to localStorage and redirect to the dashboard
     if (users.length) {
       localStorage.setItem("user", JSON.stringify(users[0]));
       location.hash = "/dashboard";
@@ -48,7 +53,7 @@ function renderLogin() {
   });
 }
 
-
+// Function to register
 function renderRegister() {
 document.getElementById("app").innerHTML = `
     <div class="auth-container register-view">
@@ -91,6 +96,7 @@ document.getElementById("app").innerHTML = `
 }
 
 
+// Function to display available events
 function renderDashboard() {
   const user = getUser();
   document.getElementById("app").innerHTML = `
@@ -144,14 +150,12 @@ async function loadEvents() {
       <span>Capacity: ${ev.capacity}</span><br>
       ${user.role === "admin" ? `
         <button onclick="deleteEvent('${ev.id}')">Delete</button>
-        <button onclick="editEvent('${ev.id}')">Edit</button>` : `
-        <button ${ev.capacity <= 0 ? 'disabled' : ''}>
-          ${ev.capacity <= 0 ? 'Sold Out' : 'Enroll'}
-        </button>`}
+      ` : ""}
     </div>`).join("");
     
 }
 
+// Function to delete events
 async function deleteEvent(id) {
   if (confirm("Are you sure you want to delete this event?")) {
     await fetch(`http://localhost:3000/events/${id}`, { method: "DELETE" });
@@ -160,10 +164,7 @@ async function deleteEvent(id) {
   }
 }
 
-function editEvent(id) {
-
-}
-
+// Function to display a message when you are not logged in or registered.
 function renderNotFound() {
   document.getElementById("app").innerHTML = `
     <div class="not-found">
@@ -176,6 +177,7 @@ function getUser() {
   return JSON.parse(localStorage.getItem("user"));
 }
 
+// Event listener for the logout link
 document.getElementById("logout-link").addEventListener("click", () => {
   localStorage.removeItem("user");
   location.hash = "/login";
